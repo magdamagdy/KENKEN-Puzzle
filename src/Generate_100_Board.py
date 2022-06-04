@@ -1,5 +1,5 @@
-from KenKen_Game import generate_kenken ,kenken_domains,get_neighbors_cages
-from csp_algorithms import backtracking_search
+from csp_algorithms import kenken_solver
+from KenKen_Game import kenken_data,kenken_generator
 from time import time
 import xlwt
 from xlwt import Workbook
@@ -24,27 +24,30 @@ for i in range(7):
         sheet.write(row,0,f'{board_count}',header_style)
         sheet.write(row,1,f'{board_size}*{board_size}',data_style)
 
-        #Generator of board
-        gen_cages = generate_kenken(board_size)
-        variables = [members for members, _, _ in gen_cages]
-        domains = kenken_domains(board_size, gen_cages)
-        neighbors_cages = get_neighbors_cages(gen_cages)
+       #Generator of board
+        ken = kenken_generator(board_size)
+        gen_cages = ken.generate_kenken()
+        ken_data = kenken_data()
+        domains = ken_data.kenken_domains(board_size, gen_cages)
+        neighbors_cages = ken_data.get_neighbors_cages(gen_cages)
+        variables = ken_data.get_variables(gen_cages)
+        ken_solver = kenken_solver()
 
         #backward tracking
         Time_of_BK = time()
-        assignment_bk = backtracking_search(variables,domains,neighbors_cages)
+        assignment_bk = ken_solver.backtracking_search(variables,domains,neighbors_cages)
         Time_of_BK = time()-Time_of_BK
         sheet.write(row,2,Time_of_BK,data_style)
     
         #forward checking
         Time_of_FC = time()
-        assignment_fc = backtracking_search(variables,domains,neighbors_cages, inference="fc")
+        assignment_fc = ken_solver.backtracking_search(variables,domains,neighbors_cages, inference="fc")
         Time_of_FC = time()-Time_of_FC
         sheet.write(row,3,Time_of_FC,data_style)
         
         #Arc Consistency
         Time_of_ARC_C= time()
-        assignment_arc = backtracking_search(variables,domains,neighbors_cages, inference="arc")
+        assignment_arc = ken_solver.backtracking_search(variables,domains,neighbors_cages, inference="arc")
         Time_of_ARC_C= time()-Time_of_ARC_C
         sheet.write(row,4,Time_of_ARC_C,data_style)
         
